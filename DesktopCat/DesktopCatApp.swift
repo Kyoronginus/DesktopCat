@@ -6,12 +6,29 @@
 //
 
 import SwiftUI
+import AppKit
 
 @main
 struct DesktopCatApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
     var body: some Scene {
-        WindowGroup {
-            ContentView()
+        Settings {
+            EmptyView()
         }
+    }
+}
+
+class AppDelegate: NSObject, NSApplicationDelegate {
+    var panel: DesktopPanel?
+    
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        let screenBounds = NSScreen.main?.frame ?? .zero
+        let newPanel = DesktopPanel(contentRect: screenBounds)
+        let hostingView = NSHostingView(rootView: CatView())
+        hostingView.frame = screenBounds
+        newPanel.contentView = hostingView
+        newPanel.makeKeyAndOrderFront(nil)
+        self.panel = newPanel
     }
 }
