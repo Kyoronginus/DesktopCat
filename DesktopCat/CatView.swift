@@ -9,13 +9,12 @@ import SwiftUI
 
 struct CatView: View {
     var body: some View{
-        ZStack{
-//            Color.clear
-            
-            Text("Placeholder🐱")
-                .font(.system(size: 80))
+        ZStack {
+            Image("default_left")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 160, height: 160)
         }
     }
 }
-
 

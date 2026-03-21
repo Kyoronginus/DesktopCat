@@ -23,7 +23,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var panel: DesktopPanel?
     
     func applicationDidFinishLaunching(_ notification: Notification) {
-        let screenBounds = NSScreen.main?.frame ?? .zero
+        let screenBounds = NSScreen.main?.frame ?? .zero //how big is the monitor rn?
         let newPanel = DesktopPanel(contentRect: screenBounds)
         let hostingView = NSHostingView(rootView: CatView())
         hostingView.frame = screenBounds

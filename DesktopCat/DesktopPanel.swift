@@ -16,15 +16,17 @@ class DesktopPanel : NSPanel {
             backing: .buffered,
             defer: false
         )
-        
+        // set the application to desktop-level
         self.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopIconWindow)))
+        
         self.backgroundColor = .clear
-        self.isOpaque = false
+//        self.isOpaque = false
         self.hasShadow = false
         self.ignoresMouseEvents = true
-        self.collectionBehavior = [.canJoinAllSpaces, .stationary] // Visible on all desktops
+        self.collectionBehavior = [.canJoinAllSpaces, .stationary]
     }
     
+    //buat sleeping cat nanti
     override var canBecomeKey: Bool {
         return true
     }
