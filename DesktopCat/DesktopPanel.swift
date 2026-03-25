@@ -16,18 +16,21 @@ class DesktopPanel : NSPanel {
             backing: .buffered,
             defer: false
         )
-        // set the application to desktop-level
-        self.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopIconWindow)))
+        
+        
+        // set the application to desktop-level + 1
+        // klo disamain desktop-level somehow malah ke belakang..?
+        self.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopIconWindow)) + 1)
         
         self.backgroundColor = .clear
-//        self.isOpaque = false
+        self.isOpaque = false
         self.hasShadow = false
-        self.ignoresMouseEvents = true
+        self.ignoresMouseEvents = false
         self.collectionBehavior = [.canJoinAllSpaces, .stationary]
     }
     
-    //buat sleeping cat nanti
-    override var canBecomeKey: Bool {
-        return true
-    }
+//    //buat sleeping cat nanti
+//    override var canBecomeKey: Bool {
+//        return true
+//    }
 }

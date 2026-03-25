@@ -18,14 +18,23 @@ struct DesktopCatApp: App {
         }
     }
 }
-
 class AppDelegate: NSObject, NSApplicationDelegate {
     var panel: DesktopPanel?
+    let catController = CatBehaviorController()
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         let screenBounds = NSScreen.main?.frame ?? .zero //how big is the monitor rn?
         let newPanel = DesktopPanel(contentRect: screenBounds)
-        let hostingView = NSHostingView(rootView: CatView())
+        
+        // Toggle window interactability based on mouse distance to cat
+        newPanel.ignoresMouseEvents = true
+        catController.onHoverStateChange = { [weak newPanel] isHovering in
+            newPanel?.ignoresMouseEvents = !isHovering
+        }
+        
+        // lempar instance catControler ke catView
+        // dibikin jadi injection gini karena masalah transparent window yg ngehalang click. 
+        let hostingView = NSHostingView(rootView: CatView(controller: catController))
         hostingView.frame = screenBounds
         newPanel.contentView = hostingView
         newPanel.makeKeyAndOrderFront(nil)
