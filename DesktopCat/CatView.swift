@@ -29,11 +29,7 @@ struct CatView: View {
                             .transition(.scale)
                             .offset(x: 0, y: -20)
                     }
-                    
-                    if controller.catState == .thrown {
-                        Image("angry")
-                    }
-                    
+
                     Image(controller.currentFrame)
                         .resizable()
                         .scaledToFit()
@@ -42,6 +38,18 @@ struct CatView: View {
                             x: (controller.facingRight ? -1 : 1) * (1.0 + controller.zHeight / 100),
                             y: 1.0 + controller.zHeight / 100
                         )
+                    
+                    if controller.catState == .thrown {
+                        Image("angry_logo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 50, height: 50)
+                            .offset(x: -25, y: -35)
+                            .scaleEffect(
+                                x: (controller.facingRight ? -1 : 1) * (1.0 + controller.zHeight / 100),
+                                y: 1.0 + controller.zHeight / 100
+                            )
+                    }
 
                 }
                 .animation(.easeInOut(duration: 0.2), value: controller.carriedFileIcon != nil)
