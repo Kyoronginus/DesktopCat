@@ -92,6 +92,8 @@ class CatBehaviorController: ObservableObject {
         if isHovering != wasHovering {
             wasHovering = isHovering
             onHoverStateChange?(isHovering)
+            
+            
         }
         
         // Pause action while being dragged

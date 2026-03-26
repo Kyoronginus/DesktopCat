@@ -13,6 +13,7 @@ struct CatView: View {
     @State private var dragStartPos: CGPoint = .zero
     @State private var lastDragSample: (point: CGPoint, time: TimeInterval)?
     @State private var prevDragSample: (point: CGPoint, time: TimeInterval)?
+    @State private var isHovering: Bool = false
     
     var body: some View {
         TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { context in
@@ -38,6 +39,18 @@ struct CatView: View {
                             x: (controller.facingRight ? -1 : 1) * (1.0 + controller.zHeight / 100),
                             y: 1.0 + controller.zHeight / 100
                         )
+                        .onHover(perform: { isHovering in
+                            self.isHovering = isHovering
+                            
+    
+                            if !controller.isDragging {
+                                if isHovering {
+                                    NSCursor.openHand.set()
+                                } else {
+                                    NSCursor.arrow.set()
+                                }
+                            }
+                        })
                     
                     if controller.catState == .thrown {
                         Image("angry_logo")
@@ -58,6 +71,7 @@ struct CatView: View {
                     DragGesture()
                         .onChanged { value in
                             if !controller.isDragging {
+                                NSCursor.closedHand.set()
                                 controller.isDragging = true
                                 dragStartPos = controller.catPosition
                                 
@@ -81,6 +95,11 @@ struct CatView: View {
 //                            controller.isDragging = false
                             let velocity = computeVelocity(from: prevDragSample, to: lastDragSample)
                             controller.handleDrop(velocity: velocity)
+                            if self.isHovering {
+                                NSCursor.openHand.set()
+                            } else{
+                                NSCursor.arrow.set()
+                            }
                         }
                 )
         }

@@ -7,14 +7,20 @@
 
 import SwiftUI
 import AppKit
+import Playgrounds
 
 @main
 struct DesktopCatApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     var body: some Scene {
-        Settings {
-            EmptyView()
+        MenuBarExtra("", systemImage: "cat"){
+            Button("Show Cat"){
+                NSWorkspace.shared.hideOtherApplications()
+            }
+            Button("Bye bye"){
+                NSApplication.shared.terminate(self)
+            }
         }
     }
 }

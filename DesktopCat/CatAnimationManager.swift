@@ -30,7 +30,7 @@ enum CatAnimation: String {
             return ["sleep_left_4",
                     "sleep_left_5"]
         case .poking:
-            return ["poking_left_1", "poking_left_2"]
+            return ["poking_left_1", "poking_left_3"]
         }
     }
     
