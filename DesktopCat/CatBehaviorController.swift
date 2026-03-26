@@ -16,6 +16,7 @@ enum CatState {
     case droppingFile
     case sleep
     case poking
+    case thrown
     
 }
 
@@ -27,9 +28,13 @@ class CatBehaviorController: ObservableObject {
     @Published var carriedFileName: String? = nil
     @Published var carriedFileIcon: NSImage? = nil
     @Published var isDragging: Bool = false
+    @Published var velocity: CGPoint = .zero
+    @Published var zHeight: CGFloat = 0
     
     let animationManager = CatAnimationManager()
     let fileScanner = DesktopFileScanner(scanInterval: 5.0)
+    
+    private var zVelocity: Double = 0
     
     private let interactionDistance: CGFloat = 50.0
     
@@ -136,6 +141,11 @@ class CatBehaviorController: ObservableObject {
                 catState = .idle
                 stateEnteredAt = date
             }
+            
+        case .thrown:
+            // physic sim
+            simulatePhysics()
+            
         }
     }
 
@@ -247,7 +257,6 @@ class CatBehaviorController: ObservableObject {
         animationManager.setAnimation(.idle)
         stateEnteredAt = lastUpdateDate
         
-        // Force rescan so positions are updated
         fileScanner.stopScanning()
         fileScanner.startScanning()
     }
@@ -272,6 +281,73 @@ class CatBehaviorController: ObservableObject {
         let y = CGFloat.random(in: margin...(screenBounds.height - margin))
         return CGPoint(x: x, y: y)
     }
+    
+    func handleDrop(velocity: CGVector?) {
+        self.isDragging = false
+        
+        guard carriedFileName == nil else {
+            dropFile()
+            return
+        }
+        
+        if let v = velocity, sqrt(v.dx*v.dx + v.dy*v.dy) > 200 {
+            self.catState = .thrown
+            self.velocity = CGPoint(x: v.dx, y: v.dy)
+            self.zVelocity = 500
+        } else {
+            self.catState = .idle
+        }
+    }
+    
+    private func simulatePhysics() {
+        let gravity: Double = 900.0
+        let groundFriction: Double = 0.5
+//        let airResistance: Double = 0.99
+        
+        
+        
+        self.zVelocity -= CGFloat(gravity * deltaTime)
+        self.zHeight += self.zVelocity * CGFloat(deltaTime)
+        
+        self.catPosition.x += self.velocity.x * CGFloat(deltaTime)
+        self.catPosition.y += self.velocity.y * CGFloat(deltaTime)
+        
+
+        if self.catPosition.x < screenBounds.minX || self.catPosition.x > screenBounds.maxX{
+            if self.catPosition.x < screenBounds.minX{
+                catPosition.x = screenBounds.minX
+            } else {
+                catPosition.x = screenBounds.maxX
+            }
+            self.velocity.x *= -0.5
+        }
+        
+        if self.catPosition.y < screenBounds.minY || self.catPosition.y > screenBounds.maxY{
+            if self.catPosition.y < screenBounds.minY{
+                catPosition.y = screenBounds.minY
+            } else {
+                catPosition.y = screenBounds.maxY
+            }
+            self.velocity.y *= -0.5
+        }
+        
+        
+        if self.zHeight < 0 {
+            self.zHeight = 0
+            self.velocity.x *= CGFloat(groundFriction)
+            self.velocity.y *= CGFloat(groundFriction)
+        } else {
+            
+            
+//            self.velocity.x *= CGFloat(airResistance)
+//            self.velocity.y *= CGFloat(airResistance)
+        }
+        
+        if abs(self.velocity.x) < 0.01 && abs(self.velocity.y) < 0.01  {
+            self.zVelocity = 0
+            catState = .idle
+        }
+    }
 }
 
 func pointDistance(_ a: CGPoint, _ b: CGPoint) -> CGFloat {
@@ -279,4 +355,5 @@ func pointDistance(_ a: CGPoint, _ b: CGPoint) -> CGFloat {
     let dy = a.y - b.y
     return sqrt(dx * dx + dy * dy)
 }
+
 
