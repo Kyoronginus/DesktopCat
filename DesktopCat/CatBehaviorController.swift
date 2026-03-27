@@ -20,7 +20,8 @@ enum CatState {
     
 }
 
-class CatBehaviorController: ObservableObject {
+class CatBehaviorController: ObservableObject, Identifiable {
+    let id = UUID()
     @Published var catPosition: CGPoint = .zero
     @Published var catState: CatState = .idle
     @Published var currentFrame: String = "default_left_1"
@@ -51,15 +52,17 @@ class CatBehaviorController: ObservableObject {
     private var stateEnteredAt: Date = .now
     private var lastUpdateDate: Date = .now
     private var deltaTime: CGFloat = 0
-    private var wasHovering: Bool = false
+    @Published var isHovering: Bool = false
     
     var onHoverStateChange: ((Bool) -> Void)?
     
     func setup(screenBounds: CGRect) {
         self.screenBounds = screenBounds
+        let xPos = CGFloat.random(in: screenBounds.minX..<screenBounds.maxX)
+        let yPos = CGFloat.random(in: screenBounds.minY..<screenBounds.maxY)
         catPosition = CGPoint(
-            x: screenBounds.midX,
-            y: screenBounds.maxY - 80
+            x: xPos,
+            y: yPos
         )
     }
     
@@ -87,13 +90,11 @@ class CatBehaviorController: ObservableObject {
         // Hover detection
         let appKitMouse = NSEvent.mouseLocation
         let swiftUIMouse = CGPoint(x: appKitMouse.x, y: screenBounds.height - appKitMouse.y)
-        let isHovering = pointDistance(swiftUIMouse, catPosition) < 80.0 // kekecilan?
+        let hovering = pointDistance(swiftUIMouse, catPosition) < 80.0 // kekecilan?
         
-        if isHovering != wasHovering {
-            wasHovering = isHovering
+        if hovering != isHovering {
+            isHovering = hovering
             onHoverStateChange?(isHovering)
-            
-            
         }
         
         // Pause action while being dragged

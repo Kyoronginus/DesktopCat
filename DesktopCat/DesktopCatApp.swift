@@ -8,6 +8,7 @@
 import SwiftUI
 import AppKit
 import Playgrounds
+import Combine
 
 @main
 struct DesktopCatApp: App {
@@ -15,35 +16,67 @@ struct DesktopCatApp: App {
     
     var body: some Scene {
         MenuBarExtra("", systemImage: "cat"){
-            Button("Show Cat"){
+            Button("More Cats") {
+                appDelegate.addCat()
+                
+            }
+            Button("Show Cat") {
                 NSWorkspace.shared.hideOtherApplications()
             }
-            Button("Bye bye"){
+            Button("Bye bye") {
                 NSApplication.shared.terminate(self)
             }
         }
     }
 }
-class AppDelegate: NSObject, NSApplicationDelegate {
+
+struct CatsContainerView: View {
+    @ObservedObject var appDelegate: AppDelegate
+    
+    var body: some View {
+        ZStack {
+            Color.clear
+            ForEach(appDelegate.controllers) { controller in
+                CatView(controller: controller)
+            }
+        }
+        .edgesIgnoringSafeArea(.all)
+    }
+}
+
+class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
     var panel: DesktopPanel?
-    let catController = CatBehaviorController()
+    @Published var controllers: [CatBehaviorController] = []
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         let screenBounds = NSScreen.main?.frame ?? .zero //how big is the monitor rn?
         let newPanel = DesktopPanel(contentRect: screenBounds)
         
-        // Toggle window interactability based on mouse distance to cat
-        newPanel.ignoresMouseEvents = true
-        catController.onHoverStateChange = { [weak newPanel] isHovering in
-            newPanel?.ignoresMouseEvents = !isHovering
-        }
+        // Spawn the first cat
+        addCat()
         
-        // lempar instance catControler ke catView
-        // dibikin jadi injection gini karena masalah transparent window yg ngehalang click. 
-        let hostingView = NSHostingView(rootView: CatView(controller: catController))
+        let hostingView = NSHostingView(rootView: CatsContainerView(appDelegate: self))
         hostingView.frame = screenBounds
         newPanel.contentView = hostingView
         newPanel.makeKeyAndOrderFront(nil)
         self.panel = newPanel
+    }
+    
+    func addCat() {
+        let newController = CatBehaviorController()
+        let screenBounds = NSScreen.main?.frame ?? .zero
+        
+        newController.onHoverStateChange = { [weak self] _ in
+            self?.updateHoverState()
+        }
+        
+        controllers.append(newController)
+        newController.setup(screenBounds: screenBounds)
+        newController.start()
+    }
+    
+    private func updateHoverState() {
+        let isAnyHovering = controllers.contains(where: { $0.isHovering })
+        panel?.ignoresMouseEvents = !isAnyHovering
     }
 }
