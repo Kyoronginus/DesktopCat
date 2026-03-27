@@ -34,6 +34,7 @@ class CatBehaviorController: ObservableObject, Identifiable {
     
     let animationManager = CatAnimationManager()
     let fileScanner = DesktopFileScanner(scanInterval: 5.0)
+    let soundManager = SoundManager()
     
     private var zVelocity: Double = 0
     
@@ -146,7 +147,6 @@ class CatBehaviorController: ObservableObject, Identifiable {
             }
             
         case .thrown:
-            // physic sim
             simulatePhysics()
             
         }
@@ -170,12 +170,14 @@ class CatBehaviorController: ObservableObject, Identifiable {
     }
     
     private func sleepOnFile() {
+        soundManager.play(sound: "cat_sound_2")
         catState = .sleep
         animationManager.setAnimation(.sleeping)
         stateEnteredAt = lastUpdateDate
     }
     
     private func pokingFile(){
+        soundManager.play(sound: "cat_sound_1")
         catState = .poking
         animationManager.setAnimation(.poking)
         stateEnteredAt = lastUpdateDate
@@ -294,6 +296,7 @@ class CatBehaviorController: ObservableObject, Identifiable {
         }
         
         if let v = velocity, sqrt(v.dx*v.dx + v.dy*v.dy) > 200 {
+//            soundManager.play(sound: "cat_sound_3")
             self.catState = .thrown
             self.velocity = CGPoint(x: v.dx, y: v.dy)
             self.zVelocity = 500

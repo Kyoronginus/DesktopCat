@@ -13,6 +13,7 @@ enum CatAnimation: String {
     case sleeping
     case sleepingExtended
     case poking
+    case wakingUp
     
     var frames: [String] {
         switch self {
@@ -29,6 +30,12 @@ enum CatAnimation: String {
         case .sleepingExtended:
             return ["sleep_left_4",
                     "sleep_left_5"]
+        case .wakingUp:
+            return ["sleep_left_5",
+                    "sleep_left_4",
+                    "sleep_left_3",
+                    "sleep_left_2",
+                    "sleep_left_1"]
         case .poking:
             return ["poking_left_1", "poking_left_3"]
         }
@@ -40,6 +47,7 @@ enum CatAnimation: String {
         case .walking: return 0.15
         case .sleeping: return 0.3
         case .sleepingExtended: return 0.6
+        case .wakingUp: return 0.2
         case .poking: return 0.2
         }
     }
@@ -78,7 +86,11 @@ class CatAnimationManager {
                 // kalo sleep, lanjut ke sleeping extended
                 if currentAnimation == .sleeping {
                     self.setAnimation(.sleepingExtended)
-                } else {
+                } else if currentAnimation == .sleepingExtended{
+                    // kalo sleep extended lanjut bangun
+                    self.setAnimation(.wakingUp)
+                }
+                else {
                     frameIndex = 0
                     currentFrame = frames[frameIndex]
                 }
