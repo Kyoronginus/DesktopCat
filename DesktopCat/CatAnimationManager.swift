@@ -14,6 +14,7 @@ enum CatAnimation: String {
     case sleepingExtended
     case poking
     case wakingUp
+    case scruffed
     
     var frames: [String] {
         switch self {
@@ -38,7 +39,10 @@ enum CatAnimation: String {
                     "sleep_left_1"]
         case .poking:
             return ["poking_left_1", "poking_left_3"]
+        case .scruffed:
+            return ["scruffed_left_1", "scruffed_left_2", "scruffed_left_3"]
         }
+
     }
     
     var frameInterval: TimeInterval {
@@ -49,6 +53,7 @@ enum CatAnimation: String {
         case .sleepingExtended: return 0.6
         case .wakingUp: return 0.2
         case .poking: return 0.2
+        case .scruffed: return 0.1
         }
     }
 }

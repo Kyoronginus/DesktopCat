@@ -12,22 +12,50 @@ import Combine
 @main
 struct DesktopCatApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    let soundManager = SoundManager()
+    @ObservedObject var soundManager = SoundManager.shared
     
     var body: some Scene {
         MenuBarExtra("", systemImage: "cat"){
-            Button("More Cats") {
-                appDelegate.addCat()
-                soundManager.play(sound: "cat_sound_1")
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Image(systemName: "speaker.fill")
+                        .foregroundColor(.secondary)
+                    Slider(value: $soundManager.volume, in: 0...1)
+                    Image(systemName: "speaker.wave.3.fill")
+                        .foregroundColor(.secondary)
+                }
                 
+                Divider()
+                
+                Button(action: {
+                    appDelegate.addCat()
+                    soundManager.play(sound: "cat_sound_1")
+                }) {
+                    Text("More Cats")
+                        // .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.plain)
+                
+                Button(action: {
+                    NSWorkspace.shared.hideOtherApplications()
+                }) {
+                    Text("Show Cat")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.plain)
+                
+                Button(action: {
+                    NSApplication.shared.terminate(nil)
+                }) {
+                    Text("Bye bye")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.plain)
             }
-            Button("Show Cat") {
-                NSWorkspace.shared.hideOtherApplications()
-            }
-            Button("Bye bye") {
-                NSApplication.shared.terminate(self)
-            }
+            .padding()
+            .frame(width: 220)
         }
+        .menuBarExtraStyle(.window)
     }
 }
 
@@ -52,6 +80,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
     func applicationDidFinishLaunching(_ notification: Notification) {
         let screenBounds = NSScreen.main?.frame ?? .zero //how big is the monitor rn?
         let newPanel = DesktopPanel(contentRect: screenBounds)
+        
+        DesktopFileScanner.shared.startScanning()
         
         // Spawn the first cat
         addCat()

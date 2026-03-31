@@ -15,16 +15,19 @@ struct DesktopFileInfo {
 
 // Scans desktop file icon positions and can reposition them
 class DesktopFileScanner: ObservableObject {
+    static let shared = DesktopFileScanner()
+    
     @Published var files: [DesktopFileInfo] = []
     
     private var timer: Timer?
     private let scanInterval: TimeInterval
     
-    init(scanInterval: TimeInterval = 5.0) {
+    private init(scanInterval: TimeInterval = 5.0) {
         self.scanInterval = scanInterval
     }
     
     func startScanning() {
+        guard timer == nil else { return }
         scan()
         timer = Timer.scheduledTimer(withTimeInterval: scanInterval, repeats: true) { [weak self] _ in
             self?.scan()
@@ -70,6 +73,7 @@ class DesktopFileScanner: ObservableObject {
     // MARK: - Private
     
     private func scan() {
+        //
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             let found = Self.queryDesktopIcons()
             DispatchQueue.main.async {

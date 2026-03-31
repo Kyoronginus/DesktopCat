@@ -17,7 +17,7 @@ enum CatState {
     case sleep
     case poking
     case thrown
-    
+    case scruffed
 }
 
 class CatBehaviorController: ObservableObject, Identifiable {
@@ -31,10 +31,11 @@ class CatBehaviorController: ObservableObject, Identifiable {
     @Published var isDragging: Bool = false
     @Published var velocity: CGPoint = .zero
     @Published var zHeight: CGFloat = 0
+    @Published var rotation: CGFloat = 0
     
     let animationManager = CatAnimationManager()
-    let fileScanner = DesktopFileScanner(scanInterval: 5.0)
-    let soundManager = SoundManager()
+    let fileScanner = DesktopFileScanner.shared
+    let soundManager = SoundManager.shared
     
     private var zVelocity: Double = 0
     
@@ -68,13 +69,12 @@ class CatBehaviorController: ObservableObject, Identifiable {
     }
     
     func start() {
-        fileScanner.startScanning()
         lastUpdateDate = .now
         stateEnteredAt = .now
     }
     
     func stop() {
-        fileScanner.stopScanning()
+        // file scanner is handled globally now
     }
     
     func update(at date: Date) {
@@ -101,9 +101,13 @@ class CatBehaviorController: ObservableObject, Identifiable {
         // Pause action while being dragged
         if isDragging {
             stateEnteredAt = date
+            if catState != .scruffed {
+                catState = .scruffed
+                animationManager.setAnimation(.scruffed)
+            }
+            animationManager.update(at: date)
             return
         }
-        
         // Update behavior
         switch catState {
         case .idle:
@@ -149,6 +153,8 @@ class CatBehaviorController: ObservableObject, Identifiable {
         case .thrown:
             simulatePhysics()
             
+        case .scruffed:
+            animationManager.setAnimation(.scruffed)
         }
     }
 
@@ -261,9 +267,6 @@ class CatBehaviorController: ObservableObject, Identifiable {
         targetFile = nil
         animationManager.setAnimation(.idle)
         stateEnteredAt = lastUpdateDate
-        
-        fileScanner.stopScanning()
-        fileScanner.startScanning()
     }
     
     private func moveTowards(_ target: CGPoint) {
@@ -311,7 +314,7 @@ class CatBehaviorController: ObservableObject, Identifiable {
 //        let airResistance: Double = 0.99
         
         
-        
+        self.rotation += (self.velocity.x + self.velocity.y) * CGFloat(deltaTime)
         self.zVelocity -= CGFloat(gravity * deltaTime)
         self.zHeight += self.zVelocity * CGFloat(deltaTime)
         
@@ -351,6 +354,7 @@ class CatBehaviorController: ObservableObject, Identifiable {
         
         if abs(self.velocity.x) < 0.01 && abs(self.velocity.y) < 0.01  {
             self.zVelocity = 0
+            self.rotation = 0
             catState = .idle
         }
     }

@@ -39,10 +39,9 @@ struct CatView: View {
                             x: (controller.facingRight ? -1 : 1) * (1.0 + controller.zHeight / 100),
                             y: 1.0 + controller.zHeight / 100
                         )
+                        .rotationEffect(.degrees(controller.catState != .thrown ? 0 : controller.rotation ), anchor: .center)
                         .onHover(perform: { isHovering in
                             self.isHovering = isHovering
-                            
-    
                             if !controller.isDragging {
                                 if isHovering {
                                     NSCursor.openHand.set()

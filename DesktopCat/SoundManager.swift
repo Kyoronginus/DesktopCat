@@ -9,7 +9,14 @@ import Combine
 import AppKit
 
 class SoundManager: ObservableObject {
+    static let shared = SoundManager()
+    
     @Published var isPlaying: Bool = false
+    @Published var volume: Float = 0.5 {
+        didSet {
+            player?.volume = volume
+        }
+    }
 
     var player: AVAudioPlayer?
     
@@ -19,6 +26,7 @@ class SoundManager: ObservableObject {
             return
         }
         player = try? AVAudioPlayer(data: asset.data)
+        player?.volume = volume
         player?.play()
     }
 }
